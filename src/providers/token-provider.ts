@@ -519,6 +519,47 @@ export const WBTC_MOONBEAM = new Token(
   'Wrapped BTC bridged using Multichain'
 );
 
+// Fuji Tokens
+export const USDC_FUJI = new Token(
+  ChainId.FUJI,
+  '0x40Bd8fE2bDBC7DaB9BFeD0bdde5D6EbF86bd42A3',
+  6,
+  'USDC',
+  'USD Coin bridged using Multichain'
+);
+
+export const USDT_FUJI = new Token(
+  ChainId.FUJI,
+  '0xe46EbD82d9ab690a32F4FAbFeEE0141DA255c5A0',
+  18,
+  'USDT',
+  'Tether USD'
+);
+
+export const WAVAX_FUJI = new Token(
+  ChainId.FUJI,
+  '0xAcc15dC74880C9944775448304B263D191c6077F',
+  18,
+  'WAVAX',
+  'Wrapped AVAX'
+);
+
+export const DAI_FUJI = new Token(
+  ChainId.FUJI,
+  '0x53E0277151758dDbD91dD1048699BC856a7Ad1d2',
+  17,
+  'DAI',
+  'Dai on Fuji bridged using Multichain'
+);
+
+export const WBTC_FUJI = new Token(
+  ChainId.FUJI,
+  '0x949893E747293bb4f3e7ED79462C8afB02a4e9F0',
+  18,
+  'WBTC',
+  'Wrapped BTC bridged using Multichain'
+);
+
 export class TokenProvider implements ITokenProvider {
   constructor(
     private chainId: ChainId,
@@ -645,6 +686,8 @@ export const DAI_ON = (chainId: ChainId): Token => {
       return DAI_CELO_ALFAJORES;
     case ChainId.MOONBEAM:
       return DAI_MOONBEAM;
+    case ChainId.FUJI:
+      return DAI_FUJI;
     default:
       throw new Error(`Chain id: ${chainId} not supported`);
   }
@@ -670,6 +713,8 @@ export const USDT_ON = (chainId: ChainId): Token => {
       return USDT_ARBITRUM;
     case ChainId.ARBITRUM_RINKEBY:
       return USDT_ARBITRUM_RINKEBY;
+    case ChainId.FUJI:
+      return USDT_FUJI;
     default:
       throw new Error(`Chain id: ${chainId} not supported`);
   }
@@ -705,6 +750,8 @@ export const USDC_ON = (chainId: ChainId): Token => {
       return USDC_ETHEREUM_GNOSIS;
     case ChainId.MOONBEAM:
       return USDC_MOONBEAM;
+    case ChainId.FUJI:
+      return USDC_FUJI;
     default:
       throw new Error(`Chain id: ${chainId} not supported`);
   }

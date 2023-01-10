@@ -17,6 +17,7 @@ export enum ChainId {
   CELO_ALFAJORES = 44787,
   GNOSIS = 100,
   MOONBEAM = 1284,
+  FUJI = 43114
 }
 
 // WIP: Gnosis, Moonbeam
@@ -35,6 +36,7 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.GÖRLI,
   ChainId.CELO_ALFAJORES,
   ChainId.CELO,
+  ChainId.FUJI,
   // Gnosis and Moonbeam don't yet have contracts deployed yet
 ];
 
@@ -102,6 +104,8 @@ export const ID_TO_CHAIN_ID = (id: number): ChainId => {
       return ChainId.GNOSIS;
     case 1284:
       return ChainId.MOONBEAM;
+    case 43114:
+      return ChainId.FUJI;
     default:
       throw new Error(`Unknown chain id: ${id}`);
   }
@@ -124,6 +128,7 @@ export enum ChainName {
   CELO_ALFAJORES = 'celo-alfajores',
   GNOSIS = 'gnosis-mainnet',
   MOONBEAM = 'moonbeam-mainnet',
+  FUJI = 'avalanche-c-chain',
 }
 
 export enum NativeCurrencyName {
@@ -133,6 +138,7 @@ export enum NativeCurrencyName {
   CELO = 'CELO',
   GNOSIS = 'XDAI',
   MOONBEAM = 'GLMR',
+  FUJI = 'AVAX',
 }
 export const NATIVE_NAMES_BY_ID: { [chainId: number]: string[] } = {
   [ChainId.MAINNET]: [
@@ -194,6 +200,7 @@ export const NATIVE_NAMES_BY_ID: { [chainId: number]: string[] } = {
   [ChainId.CELO_ALFAJORES]: ['CELO'],
   [ChainId.GNOSIS]: ['XDAI'],
   [ChainId.MOONBEAM]: ['GLMR'],
+  [ChainId.FUJI]: ['AVAX'],
 };
 
 export const NATIVE_CURRENCY: { [chainId: number]: NativeCurrencyName } = {
@@ -213,6 +220,7 @@ export const NATIVE_CURRENCY: { [chainId: number]: NativeCurrencyName } = {
   [ChainId.CELO_ALFAJORES]: NativeCurrencyName.CELO,
   [ChainId.GNOSIS]: NativeCurrencyName.GNOSIS,
   [ChainId.MOONBEAM]: NativeCurrencyName.MOONBEAM,
+  [ChainId.FUJI]: NativeCurrencyName.FUJI,
 };
 
 export const ID_TO_NETWORK_NAME = (id: number): ChainName => {
@@ -249,6 +257,8 @@ export const ID_TO_NETWORK_NAME = (id: number): ChainName => {
       return ChainName.GNOSIS;
     case 1284:
       return ChainName.MOONBEAM;
+    case 43114:
+      return ChainName.FUJI;
     default:
       throw new Error(`Unknown chain id: ${id}`);
   }
@@ -288,6 +298,8 @@ export const ID_TO_PROVIDER = (id: ChainId): string => {
       return process.env.JSON_RPC_PROVIDER_CELO!;
     case ChainId.CELO_ALFAJORES:
       return process.env.JSON_RPC_PROVIDER_CELO_ALFAJORES!;
+    case ChainId.FUJI:
+      return process.env.JSON_RPC_PROVIDER_FUJI!;
     default:
       throw new Error(`Chain id: ${id} not supported`);
   }
@@ -408,6 +420,13 @@ export const WRAPPED_NATIVE_CURRENCY: { [chainId in ChainId]: Token } = {
     'WGLMR',
     'Wrapped GLMR'
   ),
+  [ChainId.FUJI]: new Token(
+    ChainId.FUJI,
+    '0xc74f6e5fd0E00f0A30c9B45b46C860080E1208Af',
+    18,
+    'WAVAX',
+    'Wrapped AVAX'
+  )
 };
 
 function isMatic(
@@ -510,6 +529,30 @@ class MoonbeamNativeCurrency extends NativeCurrency {
   }
 }
 
+function isFuji(chainId: number): chainId is ChainId.FUJI {
+  return chainId === ChainId.FUJI;
+}
+
+class FujiNativeCurrency extends NativeCurrency {
+  equals(other: Currency): boolean {
+    return other.isNative && other.chainId === this.chainId;
+  }
+
+  get wrapped(): Token {
+    if (!isFuji(this.chainId)) throw new Error('Not fuji');
+    const nativeCurrency = WRAPPED_NATIVE_CURRENCY[this.chainId];
+    if (nativeCurrency) {
+      return nativeCurrency;
+    }
+    throw new Error(`Does not support this chain ${this.chainId}`);
+  }
+
+  public constructor(chainId: number) {
+    if (!isFuji(chainId)) throw new Error('Not fuji');
+    super(chainId, 18, 'AVAX', 'Avax');
+  }
+}
+
 export class ExtendedEther extends Ether {
   public get wrapped(): Token {
     if (this.chainId in WRAPPED_NATIVE_CURRENCY)
@@ -540,6 +583,8 @@ export function nativeOnChain(chainId: number): NativeCurrency {
     cachedNativeCurrency[chainId] = new GnosisNativeCurrency(chainId);
   else if (isMoonbeam(chainId))
     cachedNativeCurrency[chainId] = new MoonbeamNativeCurrency(chainId);
+  else if (isFuji(chainId))
+    cachedNativeCurrency[chainId] = new FujiNativeCurrency(chainId);
   else cachedNativeCurrency[chainId] = ExtendedEther.onChain(chainId);
 
   return cachedNativeCurrency[chainId]!;

@@ -52,6 +52,7 @@ import {
   V2_SUPPORTED,
   V3PoolProvider,
   V3Route,
+  WBTC_FUJI,
   WBTC_GNOSIS,
   WBTC_MOONBEAM,
   WETH9,
@@ -2530,6 +2531,7 @@ describe('quote for other networks', () => {
     [ChainId.CELO_ALFAJORES]: CUSD_CELO_ALFAJORES,
     [ChainId.GNOSIS]: WBTC_GNOSIS,
     [ChainId.MOONBEAM]: WBTC_MOONBEAM,
+    [ChainId.FUJI]: WBTC_FUJI,
   };
   const TEST_ERC20_2: { [chainId in ChainId]: Token } = {
     [ChainId.MAINNET]: DAI_ON(1),
@@ -2548,6 +2550,7 @@ describe('quote for other networks', () => {
     [ChainId.CELO_ALFAJORES]: CEUR_CELO_ALFAJORES,
     [ChainId.GNOSIS]: USDC_ETHEREUM_GNOSIS,
     [ChainId.MOONBEAM]: WBTC_MOONBEAM,
+    [ChainId.FUJI]: WBTC_FUJI,
   };
 
   // TODO: Find valid pools/tokens on optimistic kovan and polygon mumbai. We skip those tests for now.
