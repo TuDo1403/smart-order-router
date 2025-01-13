@@ -17,6 +17,7 @@ import {
   CachingTokenListProvider,
   CachingTokenProviderWithFallback,
   CachingV3PoolProvider,
+  // CachingV3SubgraphProvider,
   CachingV4PoolProvider,
   CHAIN_IDS_LIST,
   EIP1559GasPriceProvider,
@@ -43,17 +44,17 @@ import {
   TokenPropertiesProvider,
   TokenProvider,
   UniswapMulticallProvider,
+  // URISubgraphProvider,
   V2PoolProvider,
+  // V2SubgraphProvider,
   V3PoolProvider,
   V3RouteWithValidQuote,
-  V4PoolProvider
+  // V3SubgraphProvider,
+  // V3SubgraphProviderWithFallBacks,
+  V4PoolProvider,
 } from '../src';
-import {
-  LegacyGasPriceProvider
-} from '../src/providers/legacy-gas-price-provider';
-import {
-  OnChainGasPriceProvider
-} from '../src/providers/on-chain-gas-price-provider';
+import { LegacyGasPriceProvider } from '../src/providers/legacy-gas-price-provider';
+import { OnChainGasPriceProvider } from '../src/providers/on-chain-gas-price-provider';
 import { PortionProvider } from '../src/providers/portion-provider';
 import { OnChainTokenFeeFetcher } from '../src/providers/token-fee-fetcher';
 
@@ -137,8 +138,8 @@ export abstract class BaseCommand extends Command {
     return this._log
       ? this._log
       : bunyan.createLogger({
-        name: 'Default Logger',
-      });
+          name: 'Default Logger',
+        });
   }
 
   get router() {
@@ -208,19 +209,19 @@ export abstract class BaseCommand extends Command {
       streams: debugJSON
         ? undefined
         : [
-          {
-            level: logLevel,
-            type: 'stream',
-            stream: bunyanDebugStream({
-              basepath: __dirname,
-              forceColor: false,
-              showDate: false,
-              showPid: false,
-              showLoggerName: false,
-              showLevel: !!debug,
-            }),
-          },
-        ],
+            {
+              level: logLevel,
+              type: 'stream',
+              stream: bunyanDebugStream({
+                basepath: __dirname,
+                forceColor: false,
+                showDate: false,
+                showPid: false,
+                showLoggerName: false,
+                showLevel: !!debug,
+              }),
+            },
+          ],
     });
 
     if (debug || debugJSON) {
@@ -298,16 +299,54 @@ export abstract class BaseCommand extends Command {
         new V3PoolProvider(chainId, multicall2Provider),
         new NodeJSCache(new NodeCache({ stdTTL: 360, useClones: false }))
       );
-      const tokenFeeFetcher = new OnChainTokenFeeFetcher(
-        chainId,
-        provider
-      )
+      const tokenFeeFetcher = new OnChainTokenFeeFetcher(chainId, provider);
       const tokenPropertiesProvider = new TokenPropertiesProvider(
         chainId,
         new NodeJSCache(new NodeCache({ stdTTL: 360, useClones: false })),
         tokenFeeFetcher
-      )
-      const v2PoolProvider = new V2PoolProvider(chainId, multicall2Provider, tokenPropertiesProvider);
+      );
+      const v2PoolProvider = new V2PoolProvider(
+        chainId,
+        multicall2Provider,
+        tokenPropertiesProvider
+      );
+      // const v3SubgraphProvider = new V3SubgraphProvider(
+      //   chainId,
+      //   3,
+      //   100000,
+      //   true,
+      //   100,
+      //   1.7976931348623157e308,
+      //   'https://gateway.thegraph.com/api/7426962db9c3c75e6291520df64858ea/subgraphs/id/GqzP4Xaehti8KSfQmv3ZctFSjnSUYZ4En5NRsiTbvZpz'
+      // );
+      // const v2SubgraphProvider = new V2SubgraphProvider(
+      //   chainId,
+      //   3,
+      //   100000,
+      //   true,
+      //   1000,
+      //   undefined,
+      //   undefined,
+      //   'https://gateway.thegraph.com/api/7426962db9c3c75e6291520df64858ea/subgraphs/id/4jGhpKjW4prWoyt5Bwk1ZHUwdEmNWveJcjEyjoTZWCY9'
+      // );
+
+      // const v3URISubgraphProvider = new URISubgraphProvider(
+      //   chainId,
+      //   'https://gateway.thegraph.com/api/7426962db9c3c75e6291520df64858ea/subgraphs/id/GqzP4Xaehti8KSfQmv3ZctFSjnSUYZ4En5NRsiTbvZpz'
+      // );
+
+      // const v3SubgraphProvider = new V3SubgraphProviderWithFallBacks([
+      //   new CachingV3SubgraphProvider(
+      //     chainId,
+      //     new URISubgraphProvider(
+      //       chainId,
+      //       'https://gateway.thegraph.com/api/bc48e4cdac2f9738e63f5827e0175b13/subgraphs/id/GqzP4Xaehti8KSfQmv3ZctFSjnSUYZ4En5NRsiTbvZpz',
+      //       10000,
+      //       2
+      //     ),
+      //     new NodeJSCache(new NodeCache({ stdTTL: 300, useClones: false }))
+      //   ),
+      // ]);
 
       const portionProvider = new PortionProvider();
       const tenderlySimulator = new TenderlySimulator(
@@ -349,6 +388,8 @@ export abstract class BaseCommand extends Command {
         provider,
         chainId,
         multicall2Provider: multicall2Provider,
+        // v3SubgraphProvider,
+        // v2SubgraphProvider,
         gasPriceProvider: new CachingGasStationProvider(
           chainId,
           new OnChainGasPriceProvider(
@@ -377,7 +418,7 @@ export abstract class BaseCommand extends Command {
     blockNumber: BigNumber,
     estimatedGasUsed: BigNumber,
     gasPriceWei: BigNumber,
-    simulationStatus?: SimulationStatus,
+    simulationStatus?: SimulationStatus
   ) {
     this.logger.info(`Best Route:`);
     this.logger.info(`${routeAmountsToString(routeAmounts)}`);
@@ -403,7 +444,7 @@ export abstract class BaseCommand extends Command {
         Math.min(estimatedGasUsedUSD.currency.decimals, 6)
       )}`
     );
-    if(estimatedGasUsedGasToken) {
+    if (estimatedGasUsedGasToken) {
       this.logger.info(
         `Gas Used gas token: ${estimatedGasUsedGasToken.toFixed(
           Math.min(estimatedGasUsedGasToken.currency.decimals, 6)

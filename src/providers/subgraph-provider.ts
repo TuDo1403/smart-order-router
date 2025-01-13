@@ -88,6 +88,8 @@ export abstract class SubgraphProvider<
       ${this.subgraphQuery(blockNumber)}
     `;
 
+    console.log('query', query);
+
     let pools: TRawSubgraphPool[] = [];
 
     log.info(
@@ -129,6 +131,11 @@ export abstract class SubgraphProvider<
             pools = pools.concat(poolsPage);
 
             lastId = pools[pools.length - 1]!.id;
+
+            console.log('lastId', lastId);
+            console.log('pools length', pools.length);
+            console.log('poolsPage length', poolsPage.length);
+
             metric.putMetric(
               `${this.protocol}SubgraphProvider.chain_${this.chainId}.getPools.paginate.pageSize`,
               poolsPage.length

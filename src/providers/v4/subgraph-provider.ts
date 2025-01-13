@@ -88,7 +88,7 @@ export class V4SubgraphProvider
       pools(
         first: $pageSize
         ${blockNumber ? `block: { number: ${blockNumber} }` : ``}
-          where: { id_gt: $id }
+          where: { id_gt: $id, liquidity_gt: "500000000000000000000000" }
         ) {
           id
           token0 {

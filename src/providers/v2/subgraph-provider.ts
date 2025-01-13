@@ -91,9 +91,11 @@ export class V2SubgraphProvider implements IV2SubgraphProvider {
     const query2 = gql`
         query getPools($pageSize: Int!, $id: String) {
             pairs(
-                first: $pageSize
+                first: $pageSize, 
+                orderBy: reserveUSD,
+                orderDirection: desc,
                 ${blockNumber ? `block: { number: ${blockNumber} }` : ``}
-                where: { id_gt: $id }
+                where: { id_gt: $id, reserveUSD_gt: "500000" }
             ) {
                 id
                 token0 { id, symbol }
@@ -105,6 +107,8 @@ export class V2SubgraphProvider implements IV2SubgraphProvider {
             }
         }
     `;
+
+    console.log(query2);
 
     let pools: RawV2SubgraphPool[] = [];
 
@@ -151,6 +155,10 @@ export class V2SubgraphProvider implements IV2SubgraphProvider {
 
                 pairs = pairs.concat(pairsPage);
                 lastId = pairs[pairs.length - 1]!.id;
+
+                console.log('lastId', lastId);
+                console.log('pair length', pairs.length);
+                console.log('parsPage length', pairsPage.length);
 
                 metric.putMetric(
                   `V2SubgraphProvider.chain_${this.chainId}.getPools.paginate.pageSize`,

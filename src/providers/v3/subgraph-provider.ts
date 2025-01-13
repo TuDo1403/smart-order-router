@@ -105,9 +105,11 @@ export class V3SubgraphProvider
     return `
     query getPools($pageSize: Int!, $id: String) {
       pools(
-        first: $pageSize
+        first: $pageSize,
+        orderBy: totalValueLockedUSD,
+        orderDirection: desc,
         ${blockNumber ? `block: { number: ${blockNumber} }` : ``}
-          where: { id_gt: $id }
+          where: { id_gt: $id, totalValueLockedUSD_gt: "500000" }
         ) {
           id
           token0 {

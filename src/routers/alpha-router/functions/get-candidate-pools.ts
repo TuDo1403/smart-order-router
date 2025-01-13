@@ -884,6 +884,8 @@ export async function getV3CandidatePools({
     blockNumber,
   });
 
+  allPools.forEach((pool) => console.log(JSON.stringify(pool)));
+
   log.info(
     { samplePools: allPools.slice(0, 3) },
     'Got all pools from V3 subgraph provider'
@@ -1321,6 +1323,8 @@ export async function getV2CandidatePools({
   const allPoolsRaw = await subgraphProvider.getPools(tokenIn, tokenOut, {
     blockNumber,
   });
+
+  console.log({ allPoolsRaw });
 
   // With tens of thousands of V2 pools, operations that copy pools become costly.
   // Mutate the pool directly rather than creating a new pool / token to optimmize for speed.
